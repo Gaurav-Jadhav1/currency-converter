@@ -21,10 +21,21 @@
     flex: 1;
   }
   
-  .result-display {
+.result-display {
     font-size: 1.5em;
     font-weight: bold;
     margin-top: 20px;
+  }
+
+  .status-text {
+    margin-top: 10px;
+    color: #475569;
+  }
+
+  .error-text {
+    margin-top: 10px;
+    color: #b91c1c;
+    font-weight: 600;
   }
   
   @media (max-width: 600px) {

@@ -5,7 +5,10 @@ const CurrencyInput = ({ amount, currency, onAmountChange, onCurrencyChange, rea
     <input
       type="number"
       value={amount}
-      onChange={(e) => onAmountChange(parseFloat(e.target.value))}
+      onChange={(e) => {
+        const value = parseFloat(e.target.value);
+        onAmountChange(Number.isFinite(value) ? value : 0);
+      }}
       readOnly={readOnly}
     />
     <select value={currency} onChange={(e) => onCurrencyChange(e.target.value)}>

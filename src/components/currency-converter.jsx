@@ -9,18 +9,51 @@ const CurrencyConverter = () => {
   const [fromCurrency, setFromCurrency] = useState("USD");
   const [toCurrency, setToCurrency] = useState("INR");
   const [exchangeRate, setExchangeRate] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (fromCurrency && toCurrency) {
-      axios
-        .get(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
-        .then(response => {
-          setExchangeRate(response.data.rates[toCurrency]);
-        });
-    }
+    let ignore = false;
+
+    const fetchRate = async () => {
+      if (!fromCurrency || !toCurrency) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const response = await axios.get(`https://open.er-api.com/v6/latest/${fromCurrency}`);
+        const nextRate = response.data?.rates?.[toCurrency];
+
+        if (!nextRate) {
+          throw new Error('Exchange rate not available for selected currencies.');
+        }
+
+        if (!ignore) {
+          setExchangeRate(nextRate);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError('Could not fetch exchange rates. Please try again in a moment.');
+        }
+      } finally {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchRate();
+
+    return () => {
+      ignore = true;
+    };
   }, [fromCurrency, toCurrency]);
 
   const handleAmountChange = (newAmount) => setAmount(newAmount);
+  const convertedAmount = Number.isFinite(amount * exchangeRate) ? amount * exchangeRate : 0;
 
   return (
     <div className="currency-converter">
@@ -32,14 +65,16 @@ const CurrencyConverter = () => {
         onCurrencyChange={setFromCurrency}
       />
       <CurrencyInput
-        amount={amount * exchangeRate}
+        amount={convertedAmount}
         currency={toCurrency}
         onAmountChange={handleAmountChange}
         onCurrencyChange={setToCurrency}
         readOnly
       />
+      {isLoading && <p className="status-text">Loading rates...</p>}
+      {error && <p className="error-text">{error}</p>}
       <ResultDisplay 
-        amount={amount * exchangeRate}
+        amount={convertedAmount}
         toCurrency={toCurrency}
       />
     </div>
