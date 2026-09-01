@@ -1,4 +1,3 @@
-import React from 'react';
 import CurrencyConverter from './components/currency-converter';
 
 function App() {
